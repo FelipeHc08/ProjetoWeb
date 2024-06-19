@@ -1,89 +1,73 @@
-//funcionalidades de produto
-
 const Produto = require('../model/produto');
 
-//abrir a página de pulseira
+// Abrir a página de pulseira
 function pulseiraView(req, res) {
   res.render('pulseira.html');
 }
 
-//abrir a página de criação de pulseira
+// Abrir a página de criação de pulseira
 function criarView(req, res){
   res.render('cadastrar-pulseira.html');
 }
 
-
-//cria o produto corretamente e mostra em forma de json
+// Cria o produto corretamente e redireciona para a página de produtos
 async function cadastrarProduto(req, res) {
-
   let produto = {
-    id: Math.floor(Math.random() * 1000) + 1,
     cor: req.body.cor,
     quantidade: req.body.quantidade,
     status: req.body.status
   };
-    await Produto.create(produto)
-    .then(()=>{
-      console.log(produto)
-      res.redirect('/produto/json')
-     })
-    .catch((err) =>{
-      console.log(err);
-      let erro = true;
-      res.redirect('/produto/json');
-  })
-}
 
+  try {
+    await Produto.create(produto);
+    console.log(produto);
+    res.redirect('/produto'); // Redireciona para a página de listagem de produtos
+  } catch (err) {
+    console.log(err);
+    res.render('cadastrar-pulseira.html', { erro: true }); // Renderiza a página de cadastro com erro
+  }
+}
 
 function listarProdutos(req, res) {
   Produto.findAll()
-    .then((produto) => {
-      res.json(produto);
+    .then((produtos) => {
+      res.render('listar-produtos.html', { produtos }); // Renderiza a página de listagem de produtos
     })
     .catch((err) => {
       console.log(err);
-      res.json(err);
+      res.render('listar-produtos.html', { erro: err }); // Renderiza a página de listagem com erro
     });
 }
 
 function renderizarPaginaEdicaoProduto(req, res) {
   const id = req.body.produtoIdEditar;
-  // Renderize a página de edição com o ID fornecido pelo usuário
-  // Certifique-se de criar a página de edição adequada
-  res.render('editar-pulseira.html', { id });
+  res.render('editar-pulseira.html', { id }); // Renderiza a página de edição com o ID fornecido
 }
 
-function salvarEdicaoProduto(req, res) {
+async function salvarEdicaoProduto(req, res) {
   const id = req.body['edit-id'];
   const cor = req.body['edit-cor'];
   const quantidade = req.body['edit-quantidade'];
   const status = req.body['edit-status'];
 
-  Produto.findByPk(id)
-    .then((produto) => {
-      if (produto) {
-        produto.cor = cor;
-        produto.quantidade = quantidade;
-        produto.status = status;
+  try {
+    const produto = await Produto.findByPk(id);
 
-        produto.save()
-          .then(() => {
-            res.json(produto);
-          })
-          .catch((err) => {
-            console.log(err);
-            res.json(produto);
-          });
-      } else {
-        res.json(produto);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.json(produto);
-    });
+    if (produto) {
+      produto.cor = cor;
+      produto.quantidade = quantidade;
+      produto.status = status;
+
+      await produto.save();
+      res.redirect('/produto'); // Redireciona para a página de listagem de produtos
+    } else {
+      res.render('editar-pulseira.html', { erro: 'Produto não encontrado', id }); // Renderiza a página de edição com erro
+    }
+  } catch (err) {
+    console.log(err);
+    res.render('editar-pulseira.html', { erro: 'Erro ao salvar o produto', id }); // Renderiza a página de edição com erro
+  }
 }
-
 
 async function removerProduto(req, res) {
   const id = req.body.produtoId;
@@ -93,13 +77,13 @@ async function removerProduto(req, res) {
 
     if (produto) {
       await produto.destroy();
-      res.json({ message: 'Produto removido com sucesso.' });
+      res.redirect('/produto'); // Redireciona para a página de listagem de produtos
     } else {
-      res.status(404).json({ error: 'Produto não encontrado.' });
+      res.status(404).render('listar-produtos.html', { erro: 'Produto não encontrado' }); // Renderiza a página de listagem com erro
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Erro ao remover o produto.' });
+    res.status(500).render('listar-produtos.html', { erro: 'Erro ao remover o produto' }); // Renderiza a página de listagem com erro
   }
 }
 
@@ -118,17 +102,15 @@ async function atualizarProduto(req, res) {
       produto.status = status;
 
       await produto.save();
-      res.json({ message: 'Produto atualizado com sucesso.' });
+      res.redirect('/produto'); // Redireciona para a página de listagem de produtos
     } else {
-      res.status(404).json({ error: 'Produto não encontrado.' });
+      res.status(404).render('listar-produtos.html', { erro: 'Produto não encontrado' }); // Renderiza a página de listagem com erro
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Erro ao atualizar o produto.' });
+    res.status(500).render('listar-produtos.html', { erro: 'Erro ao atualizar o produto' }); // Renderiza a página de listagem com erro
   }
 }
-
-
 
 module.exports = {
   cadastrarProduto,

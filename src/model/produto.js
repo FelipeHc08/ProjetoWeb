@@ -1,5 +1,3 @@
-// atributos de produtos do banco de dados
-
 const Sequelize = require('sequelize');
 const database = require('../db');
 
@@ -12,15 +10,15 @@ const Produto = database.define('produto', {
   },
   cor: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: false
   },
   status: {
-    type: Sequelize.STRING, // Mantido como STRING conforme o HTML
-    allowNull: false,
+    type: Sequelize.STRING,
+    allowNull: false
   },
   quantidade: {
     type: Sequelize.INTEGER,
-    allowNull: true,
+    allowNull: true
   }
 });
 

@@ -25,12 +25,12 @@ async function cadastrarUsuario(req, res) {
     await Usuario.create(usuario)
     .then(()=>{
       console.log(usuario)
-      res.redirect('/usuario/json')
+      res.redirect('/usuario')
      })
     .catch((err) =>{
       console.log(err);
       let erro = true;
-      res.redirect('/usuario/json');
+      res.redirect('/usuario');
   })
 }
 
@@ -39,7 +39,7 @@ function listarUsuarios(req, res) {
   Usuario.findAll()
     .then((usuario) => {
       // Renderiza a página com a lista de usuários
-      res.json(usuario);
+      res.redirect('/usuario');
     })
     .catch((err) => {
       // Lida com erros, caso ocorram
@@ -99,7 +99,7 @@ async function removerUsuario(req, res) {
 
     if (usuario) {
       await usuario.destroy();
-      res.json({ message: 'Usuário removido com sucesso.' });
+      res.redirect('/usuario');
     } else {
       res.status(404).json({ error: 'Usuário não encontrado.' });
     }
@@ -127,7 +127,7 @@ async function atualizarUsuario(req, res) {
       usuario.status = status;
 
       await usuario.save();
-      res.json({ message: 'Usuário atualizado com sucesso.' });
+      res.redirect('/usuario'); 
     } else {
       res.status(404).json({ error: 'Usuário não encontrado.' });
     }
